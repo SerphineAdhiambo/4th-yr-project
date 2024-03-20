@@ -1,14 +1,36 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import numpy as np
 import pickle
-
+import json
 
 app = Flask(__name__)
 model = pickle.load(open('Kidney.pkl', 'rb'))
 
-@app.route('/',methods=['GET'])
-def Home():
+@app.route('/home',methods=['GET'])
+def home():
     return render_template('index.html')
+
+@app.route('/')
+def index():
+    return render_template('auth.html')
+
+@app.route("/login", methods=['POST'])
+def login():
+    username = request.form['username']
+    password = request.form['password']
+
+    # Check if username and password match
+    for user in users:
+        if user['username'] == username and user['password'] == password:
+            return jsonify({"status": "success"})
+        
+    return jsonify({"status": "failed"})
+
+
+# Load users from JSON file
+with open('data/users.json', 'r') as f:
+    users_data = json.load(f)
+    users = users_data['users']
 
 @app.route("/predict", methods=['POST'])
 def predict():
